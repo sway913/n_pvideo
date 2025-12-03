@@ -46,14 +46,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoginModalOpen(false)
   }, [])
 
-  // Mock 登录函数 - 模拟 Google 登录
-  const mockGoogleLogin = useCallback(() => {
-    // 模拟登录延迟
-    setTimeout(() => {
-      login(mockUser)
-    }, 500)
-  }, [login])
-
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,

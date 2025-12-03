@@ -40,7 +40,7 @@ export function FeaturedCards({ cards = featuredCards }: FeaturedCardsProps) {
   return (
     <section className="featured-section">
       <div className="featured-cards">
-        {cards.map((card, index) => (
+        {cards.map((card) => (
           <div key={card.id} className="featured-card">
             <div className="card-image">
               <img src={card.image} alt={card.title} />
