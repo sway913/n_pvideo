@@ -1,8 +1,12 @@
+import { useMemo } from 'react'
+import { Card, Typography } from 'antd'
+import { ArrowRightOutlined } from '@ant-design/icons'
 import type { FeaturedCard } from '../../../types'
-import './FeaturedCards.css'
 
-// 模拟数据 - 后续可从 API 获取
-const featuredCards: FeaturedCard[] = [
+const { Title } = Typography
+
+// Default data
+const defaultCards: FeaturedCard[] = [
   {
     id: 1,
     title: 'Sora 2-Realism at Every Frame',
@@ -22,44 +26,54 @@ const featuredCards: FeaturedCard[] = [
   },
 ]
 
-// 箭头图标组件
-function ArrowIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5.83334 14.1667L14.1667 5.83334" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M5.83334 5.83334H14.1667V14.1667" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
+// Types
 interface FeaturedCardsProps {
   cards?: FeaturedCard[]
 }
 
-export function FeaturedCards({ cards = featuredCards }: FeaturedCardsProps) {
+// Component
+function FeaturedCards({ cards = defaultCards }: FeaturedCardsProps) {
+  const memoizedCards = useMemo(() => cards, [cards])
+
   return (
-    <section className="featured-section">
-      <div className="featured-cards">
-        {cards.map((card) => (
-          <div key={card.id} className="featured-card">
-            <div className="card-image">
-              <img src={card.image} alt={card.title} />
-              <div className="card-overlay" />
-              {card.label && (
-                <div className="card-label">
-                  <span>{card.label}</span>
-                </div>
-              )}
-              {card.link && (
-                <div className="card-arrow">
-                  <ArrowIcon />
-                </div>
-              )}
-            </div>
-            <h3 className="card-title">{card.title}</h3>
-          </div>
+    <section className="px-9 mt-4">
+      <div className="grid grid-cols-3 gap-3">
+        {memoizedCards.map((card) => (
+          <Card
+            key={card.id}
+            hoverable
+            className="!bg-transparent !border-none group"
+            cover={
+              <div className="relative h-[252px] rounded-xl overflow-hidden">
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
+                {card.label && (
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                    <span className="font-['Sansita_One'] text-4xl font-normal text-white uppercase whitespace-nowrap">
+                      {card.label}
+                    </span>
+                  </div>
+                )}
+                {card.link && (
+                  <div className="absolute top-4 right-4 opacity-80 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                    <ArrowRightOutlined className="text-white text-xl -rotate-45" />
+                  </div>
+                )}
+              </div>
+            }
+          >
+            <Title level={5} className="!text-white !text-sm !font-medium !mt-2 !mb-0">
+              {card.title}
+            </Title>
+          </Card>
         ))}
       </div>
     </section>
   )
 }
+
+export default FeaturedCards

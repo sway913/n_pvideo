@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Button, Typography, Tag } from 'antd'
+import { FireOutlined, ThunderboltOutlined, LikeOutlined } from '@ant-design/icons'
 import type { Video, VideoTag } from '../../../types'
-import './VideoGrid.css'
 
-// 模拟视频数据
+const { Title } = Typography
+
+// Helper function
 const generateVideos = (count: number): Video[] => {
   const heights = [297, 345, 396, 269, 377, 299]
   const images = [
@@ -34,7 +37,6 @@ const generateVideos = (count: number): Video[] => {
     'Animation Demo',
     'Product Showcase',
   ]
-  // 随机添加标签
   const tags: VideoTag[] = ['hot', 'new', 'recommended', null, null, null, null]
 
   return Array.from({ length: count }, (_, i) => ({
@@ -46,26 +48,31 @@ const generateVideos = (count: number): Video[] => {
   }))
 }
 
-// 标签组件
-function VideoTagBadge({ tag }: { tag: VideoTag }) {
-  if (!tag) return null
-  
-  const tagConfig = {
-    hot: { label: '热门', icon: '🔥', gradient: 'linear-gradient(136deg, #FF4B33 0%, #FF55A6 100%)' },
-    new: { label: 'New', icon: null, gradient: 'linear-gradient(180deg, #00A3F5 0%, #4DE1FF 100%)' },
-    recommended: { label: '推荐', icon: '👍', gradient: 'linear-gradient(180deg, #3355FF 0%, #73ADFF 100%)' },
-  }
-  
-  const config = tagConfig[tag]
-  
-  return (
-    <div className={`video-tag video-tag-${tag}`} style={{ background: config.gradient }}>
-      {config.icon && <span className="tag-icon">{config.icon}</span>}
-      <span className="tag-label">{config.label}</span>
-    </div>
-  )
+// Tag Badge Component
+interface VideoTagBadgeProps {
+  tag: VideoTag
 }
 
+const VideoTagBadge = memo(function VideoTagBadge({ tag }: VideoTagBadgeProps) {
+  if (!tag) return null
+
+  const tagConfig = {
+    hot: { label: '热门', icon: <FireOutlined />, className: 'bg-gradient-to-br from-red-500 to-pink-500' },
+    new: { label: 'New', icon: <ThunderboltOutlined />, className: 'bg-gradient-to-b from-sky-500 to-cyan-400' },
+    recommended: { label: '推荐', icon: <LikeOutlined />, className: 'bg-gradient-to-b from-blue-600 to-blue-400' },
+  }
+
+  const config = tagConfig[tag]
+
+  return (
+    <Tag className={`absolute top-2 right-2 !border-none !px-1.5 !py-0.5 !text-[10px] !font-bold !text-white ${config.className} flex items-center gap-0.5 z-10`}>
+      {config.icon}
+      {config.label}
+    </Tag>
+  )
+})
+
+// Types
 interface VideoGridProps {
   title: string
   videos?: Video[]
@@ -73,65 +80,79 @@ interface VideoGridProps {
   viewAllLink?: string
 }
 
-export function VideoGrid({ 
-  title, 
-  videos, 
+// Component
+function VideoGrid({
+  title,
+  videos,
   viewAllText = 'View all',
-  viewAllLink 
+  viewAllLink
 }: VideoGridProps) {
   const navigate = useNavigate()
   const [hoveredId, setHoveredId] = useState<number | null>(null)
-  const displayVideos = videos || generateVideos(16)
+  const displayVideos = useMemo(() => videos || generateVideos(16), [videos])
 
-  // 将视频分成5列
-  const columns: Video[][] = [[], [], [], [], []]
-  displayVideos.forEach((video, index) => {
-    columns[index % 5].push(video)
-  })
+  const columns = useMemo(() => {
+    const cols: Video[][] = [[], [], [], [], []]
+    displayVideos.forEach((video, index) => {
+      cols[index % 5].push(video)
+    })
+    return cols
+  }, [displayVideos])
 
-  const handleViewAll = () => {
+  const handleViewAll = useCallback(() => {
     if (viewAllLink) {
       navigate(viewAllLink)
     }
-  }
+  }, [viewAllLink, navigate])
 
-  const handleVideoClick = (videoId: number) => {
+  const handleVideoClick = useCallback((videoId: number) => {
     navigate(`/video/${videoId}`)
-  }
+  }, [navigate])
 
-  const handleRemixClick = (e: React.MouseEvent, video: Video) => {
+  const handleRemixClick = useCallback((e: React.MouseEvent, video: Video) => {
     e.stopPropagation()
     navigate(`/remix?title=${encodeURIComponent(video.title)}&id=${video.id}`)
-  }
+  }, [navigate])
 
   return (
-    <section className="video-grid-section">
-      <h2 className="section-title">{title}</h2>
-      <div className="video-grid-container">
-        <div className="video-grid">
+    <section className="px-9 mt-12">
+      <Title level={2} className="!text-4xl !font-bold !text-white !uppercase !mb-4">
+        {title}
+      </Title>
+      <div className="relative h-[600px] overflow-hidden">
+        <div className="grid grid-cols-5 gap-2">
           {columns.map((column, colIndex) => (
-            <div key={colIndex} className="video-column">
+            <div key={colIndex} className="flex flex-col gap-2">
               {column.map((video) => (
                 <div
                   key={video.id}
-                  className="video-item"
+                  className="relative rounded-lg overflow-hidden cursor-pointer group"
                   style={{ height: video.height }}
                   onMouseEnter={() => setHoveredId(video.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   onClick={() => handleVideoClick(video.id)}
                 >
-                  <img src={video.image} alt={video.title} />
+                  <img
+                    src={video.image}
+                    alt={video.title}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
                   {video.tag && <VideoTagBadge tag={video.tag} />}
                   {hoveredId === video.id && (
-                    <div className="video-overlay">
-                      <div className="video-info">
-                        <h4 className="video-title">{video.title}</h4>
-                        <button 
-                          className="remix-btn"
+                    <div className="absolute inset-0 flex flex-col justify-end animate-fadeIn">
+                      {/* 底部渐变遮罩层 */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[187px] bg-gradient-to-t from-black to-transparent rounded-b-lg" />
+                      {/* 内容区域 */}
+                      <div className="relative z-10 flex flex-col items-center justify-center pb-10">
+                        <h4 className="text-white text-xl font-bold mb-4 px-4 text-center truncate max-w-full tracking-tight">
+                          {video.title}
+                        </h4>
+                        <Button
+                          className="gradient-green !border-none !text-black !text-base !font-bold !w-[160px] !h-[39px] !rounded-xl hover:!opacity-90"
                           onClick={(e) => handleRemixClick(e, video)}
                         >
-                          <span>Remix</span>
-                        </button>
+                          Remix
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -140,11 +161,20 @@ export function VideoGrid({
             </div>
           ))}
         </div>
-        <div className="grid-fade-overlay" />
-        <button className="view-all-btn" onClick={handleViewAll}>
-          <span>{viewAllText} {title}</span>
-        </button>
+        {/* 底部渐变遮罩 */}
+        <div className="absolute bottom-0 left-0 right-0 h-[245px] bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none" />
+        {/* View all 按钮 */}
+        <Button
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 !w-[200px] !h-[48px] !bg-[rgba(105,255,71,0.2)] !border !border-[rgba(105,255,71,0.2)] !rounded-xl hover:!bg-[rgba(105,255,71,0.3)] hover:!border-[rgba(105,255,71,0.4)]"
+          onClick={handleViewAll}
+        >
+          <span className="gradient-text-green text-base font-bold">
+            {viewAllText} {title}
+          </span>
+        </Button>
       </div>
     </section>
   )
 }
+
+export default VideoGrid

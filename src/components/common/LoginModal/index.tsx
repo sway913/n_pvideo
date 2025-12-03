@@ -1,7 +1,11 @@
+import { useCallback } from 'react'
+import { Modal, Button, Typography } from 'antd'
+import { CloseOutlined } from '@ant-design/icons'
 import { useAuth, mockUser } from '../../../context/AuthContext'
-import './LoginModal.css'
 
-// Google 图标组件
+const { Title, Paragraph, Link } = Typography
+
+// Google Icon Component
 function GoogleIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -13,51 +17,57 @@ function GoogleIcon() {
   )
 }
 
-// 关闭图标组件
-function CloseIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M18 6L6 18M6 6l12 12" stroke="#888888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
-export function LoginModal() {
+// Component
+function LoginModal() {
   const { isLoginModalOpen, closeLoginModal, login } = useAuth()
 
-  if (!isLoginModalOpen) return null
-
-  const handleGoogleLogin = () => {
-    // Mock 登录 - 模拟 500ms 延迟后登录成功
+  const handleGoogleLogin = useCallback(() => {
     setTimeout(() => {
       login(mockUser)
     }, 500)
-  }
-
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      closeLoginModal()
-    }
-  }
+  }, [login])
 
   return (
-    <div className="login-modal-overlay" onClick={handleOverlayClick}>
-      <div className="login-modal">
-        <button className="close-btn" onClick={closeLoginModal}>
-          <CloseIcon />
-        </button>
-        
-        <h1 className="login-title">Login to Nami Video</h1>
-        
-        <button className="google-login-btn" onClick={handleGoogleLogin}>
-          <GoogleIcon />
-          <span>Log in with Google</span>
-        </button>
-        
-        <p className="login-terms">
-          By continuing, I acknowledge the <a href="#">Privacy Policy</a> and agree to the <a href="#">Terms of Use</a>. I also confirm that I am at least 18 years old
-        </p>
+    <Modal
+      open={isLoginModalOpen}
+      onCancel={closeLoginModal}
+      footer={null}
+      closeIcon={<CloseOutlined className="text-gray-400" />}
+      centered
+      width={600}
+      className="[&_.ant-modal-content]:!bg-[#131517] [&_.ant-modal-content]:!rounded-t-3xl [&_.ant-modal-content]:!rounded-b-none [&_.ant-modal-content]:!p-9"
+      styles={{
+        mask: { backgroundColor: 'rgba(0, 0, 0, 0.82)' }
+      }}
+    >
+      <div className="text-center">
+        <Title level={2} className="!text-white !text-4xl !font-bold !mb-8">
+          Login to Nami Video
+        </Title>
+
+        <Button
+          size="large"
+          icon={<GoogleIcon />}
+          className="!w-full !h-14 !bg-white !rounded-full !border-none !text-lg !font-semibold !text-black hover:!bg-gray-100 flex items-center justify-center gap-3"
+          onClick={handleGoogleLogin}
+        >
+          Log in with Google
+        </Button>
+
+        <Paragraph className="!text-white/50 !text-sm !mt-6 !mb-0 !leading-relaxed">
+          By continuing, I acknowledge the{' '}
+          <Link href="#" className="!text-white/50 !underline hover:!text-white">
+            Privacy Policy
+          </Link>{' '}
+          and agree to the{' '}
+          <Link href="#" className="!text-white/50 !underline hover:!text-white">
+            Terms of Use
+          </Link>
+          . I also confirm that I am at least 18 years old
+        </Paragraph>
       </div>
-    </div>
+    </Modal>
   )
 }
+
+export default LoginModal

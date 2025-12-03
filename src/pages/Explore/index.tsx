@@ -1,48 +1,46 @@
 import { useRef, useCallback, useState, useEffect } from 'react'
+import { Spin, Typography } from 'antd'
 import { CategoryTabs, FeaturedCards, VideoGrid } from '../../components/business'
 import { useHomeData } from '../../hooks/useHomeData'
-import './ExplorePage.css'
 
-export function ExplorePage() {
+const { Title } = Typography
+
+function ExplorePage() {
   const { categories, sections, loading } = useHomeData()
   const [activeSlug, setActiveSlug] = useState<string>('')
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map())
   const isScrollingRef = useRef(false)
 
-  // 默认选中第一个分类
   useEffect(() => {
     if (sections.length > 0 && !activeSlug) {
       setActiveSlug(sections[0].slug)
     }
   }, [sections, activeSlug])
 
-  // 点击 Tab 滚动到对应区域
   const handleCategoryClick = useCallback((slug: string) => {
     const sectionEl = sectionRefs.current.get(slug)
     if (sectionEl) {
       isScrollingRef.current = true
       setActiveSlug(slug)
-      
-      const headerHeight = 72 // Header 高度
-      const tabsHeight = 60 // CategoryTabs 高度
+
+      const headerHeight = 72
+      const tabsHeight = 60
       const offset = headerHeight + tabsHeight + 20
-      
+
       const elementPosition = sectionEl.getBoundingClientRect().top + window.scrollY
       const offsetPosition = elementPosition - offset
-      
+
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
       })
-      
-      // 滚动结束后重置标志
+
       setTimeout(() => {
         isScrollingRef.current = false
       }, 500)
     }
   }, [])
 
-  // 注册 section ref
   const setSectionRef = useCallback((slug: string, el: HTMLElement | null) => {
     if (el) {
       sectionRefs.current.set(slug, el)
@@ -51,17 +49,16 @@ export function ExplorePage() {
     }
   }, [])
 
-  // 监听滚动事件，更新当前激活的 Tab
   useEffect(() => {
     const handleScroll = () => {
       if (isScrollingRef.current) return
-      
+
       const headerHeight = 72
       const tabsHeight = 60
       const offset = headerHeight + tabsHeight + 100
-      
+
       let currentSlug = sections[0]?.slug || ''
-      
+
       for (const section of sections) {
         const el = sectionRefs.current.get(section.slug)
         if (el) {
@@ -71,29 +68,29 @@ export function ExplorePage() {
           }
         }
       }
-      
+
       if (currentSlug !== activeSlug) {
         setActiveSlug(currentSlug)
       }
     }
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [sections, activeSlug])
 
   if (loading) {
     return (
-      <div className="explore-page explore-loading">
-        <div className="loading-spinner" />
-        <p>加载中...</p>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-72px)] gap-4">
+        <Spin size="large" />
+        <p className="text-white/50">加载中...</p>
       </div>
     )
   }
 
   return (
-    <div className="explore-page">
-      <section className="categories-section">
-        <CategoryTabs 
+    <div className="pb-16">
+      <section className="pt-10 sticky top-[72px] z-50 bg-gradient-to-b from-black via-black to-transparent pb-4">
+        <CategoryTabs
           categories={categories}
           activeSlug={activeSlug}
           onCategoryClick={handleCategoryClick}
@@ -103,8 +100,10 @@ export function ExplorePage() {
       <FeaturedCards />
 
       {sections.length > 0 && (
-        <div className="gallery-header">
-          <h1 className="gallery-title">{sections[0].name} Gallery</h1>
+        <div className="px-10 pt-8">
+          <Title level={1} className="!text-4xl !font-bold !text-white !uppercase">
+            {sections[0].name} Gallery
+          </Title>
         </div>
       )}
 
@@ -113,9 +112,9 @@ export function ExplorePage() {
           key={section.id}
           ref={(el) => setSectionRef(section.slug, el)}
           id={`section-${section.slug}`}
-          className="video-section"
+          className="scroll-mt-40"
         >
-          <VideoGrid 
+          <VideoGrid
             title={section.name}
             videos={section.videos}
             viewAllText="View all"
@@ -126,3 +125,5 @@ export function ExplorePage() {
     </div>
   )
 }
+
+export default ExplorePage

@@ -1,8 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { Button, Typography } from 'antd'
 import { CATEGORIES } from '../../constants'
 import type { Video, VideoTag } from '../../types'
-import './CategoryPage.css'
+
+const { Title, Paragraph } = Typography
 
 // 模拟视频数据生成
 const generateVideos = (count: number): Video[] => {
@@ -46,27 +48,27 @@ const generateVideos = (count: number): Video[] => {
   }))
 }
 
+// 标签配置
+const TAG_CONFIG = {
+  hot: { label: '热门', icon: '🔥', bgClass: 'bg-gradient-to-br from-red-500 to-pink-400' },
+  new: { label: 'New', icon: null, bgClass: 'bg-gradient-to-b from-sky-500 to-cyan-300' },
+  recommended: { label: '推荐', icon: '👍', bgClass: 'bg-gradient-to-b from-blue-600 to-blue-400' },
+}
+
 // 标签组件
 function VideoTagBadge({ tag }: { tag: VideoTag }) {
   if (!tag) return null
-  
-  const tagConfig = {
-    hot: { label: '热门', icon: '🔥', gradient: 'linear-gradient(136deg, #FF4B33 0%, #FF55A6 100%)' },
-    new: { label: 'New', icon: null, gradient: 'linear-gradient(180deg, #00A3F5 0%, #4DE1FF 100%)' },
-    recommended: { label: '推荐', icon: '👍', gradient: 'linear-gradient(180deg, #3355FF 0%, #73ADFF 100%)' },
-  }
-  
-  const config = tagConfig[tag]
+  const config = TAG_CONFIG[tag]
   
   return (
-    <div className={`video-tag video-tag-${tag}`} style={{ background: config.gradient }}>
-      {config.icon && <span className="tag-icon">{config.icon}</span>}
-      <span className="tag-label">{config.label}</span>
+    <div className={`absolute top-2 right-2 z-10 flex items-center gap-0.5 px-1.5 h-5 rounded-full ${config.bgClass}`}>
+      {config.icon && <span className="text-[10px]">{config.icon}</span>}
+      <span className="text-[10px] font-bold text-white">{config.label}</span>
     </div>
   )
 }
 
-export function CategoryPage() {
+function CategoryPage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const [hoveredId, setHoveredId] = useState<number | null>(null)
@@ -88,58 +90,80 @@ export function CategoryPage() {
     return cols
   }, [videos])
 
-  const handleVideoClick = (videoId: number) => {
+  const handleVideoClick = useCallback((videoId: number) => {
     navigate(`/video/${videoId}`)
-  }
+  }, [navigate])
+
+  const handleRemixClick = useCallback((e: React.MouseEvent, video: Video) => {
+    e.stopPropagation()
+    navigate(`/remix?title=${encodeURIComponent(video.title)}&id=${video.id}`)
+  }, [navigate])
 
   if (!category) {
     return (
-      <div className="category-page category-not-found">
-        <h1>分类不存在</h1>
-        <button onClick={() => navigate('/explore')}>返回首页</button>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-72px)] gap-6">
+        <Title level={1} className="!text-3xl !text-white">分类不存在</Title>
+        <Button 
+          type="primary" 
+          onClick={() => navigate('/explore')}
+          className="bg-gradient-to-r from-green-400 to-lime-400 border-0 rounded-full px-6 py-2 h-auto font-semibold"
+        >
+          返回首页
+        </Button>
       </div>
     )
   }
 
   return (
-    <div className="category-page">
+    <div className="min-h-screen pb-16">
       {/* 分类标题和描述 */}
-      <header className="category-header">
-        <h1 className="category-title">{category.name} Gallery</h1>
+      <header className="px-10 pt-6">
+        <Title 
+          level={1} 
+          className="!font-bold !text-white !uppercase !text-6xl !leading-tight !mb-0"
+        >
+          {category.name} Gallery
+        </Title>
         {category.description && (
-          <p className="category-description">{category.description}</p>
+          <Paragraph className="!text-white/50 !text-base !mt-2 max-w-3xl">
+            {category.description}
+          </Paragraph>
         )}
       </header>
 
       {/* 视频瀑布流网格 */}
-      <section className="category-grid-section">
-        <div className="category-video-grid">
+      <section className="px-9 mt-6">
+        <div className="grid grid-cols-5 gap-2">
           {columns.map((column, colIndex) => (
-            <div key={colIndex} className="category-video-column">
+            <div key={colIndex} className="flex flex-col gap-2">
               {column.map((video) => (
                 <div
                   key={video.id}
-                  className="category-video-item"
+                  className="relative rounded-lg overflow-hidden cursor-pointer group"
                   style={{ height: video.height }}
                   onMouseEnter={() => setHoveredId(video.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   onClick={() => handleVideoClick(video.id)}
                 >
-                  <img src={video.image} alt={video.title} />
+                  <img 
+                    src={video.image} 
+                    alt={video.title} 
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
                   {video.tag && <VideoTagBadge tag={video.tag} />}
                   {hoveredId === video.id && (
-                    <div className="category-video-overlay">
-                      <div className="category-video-info">
-                        <h4 className="category-video-title">{video.title}</h4>
-                        <button 
-                          className="category-remix-btn"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            // 处理 Remix 操作
-                          }}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex items-end p-4 animate-fadeIn">
+                      <div className="flex items-center justify-between w-full">
+                        <h4 className="text-white text-sm font-medium truncate flex-1 mr-3">
+                          {video.title}
+                        </h4>
+                        <Button
+                          size="small"
+                          onClick={(e) => handleRemixClick(e, video)}
+                          className="!bg-gradient-to-r !from-green-400 !to-lime-400 !border-0 !rounded-full !px-4 !text-black !font-semibold !text-xs"
                         >
-                          <span>Remix</span>
-                        </button>
+                          Remix
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -152,3 +176,5 @@ export function CategoryPage() {
     </div>
   )
 }
+
+export default CategoryPage

@@ -1,35 +1,9 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import './RemixPage.css'
+import { Button, Typography } from 'antd'
+import { PlusOutlined, CloseOutlined, PlayCircleFilled } from '@ant-design/icons'
 
-// 图片上传图标
-function UploadIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="32" height="32" rx="6" fill="rgba(255,255,255,0.1)" />
-      <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-// 关闭图标
-function CloseIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M18 6L6 18M6 6L18 18" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
-// 播放图标
-function PlayIcon() {
-  return (
-    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="32" cy="32" r="32" fill="rgba(0,0,0,0.5)"/>
-      <path d="M26 20L44 32L26 44V20Z" fill="white"/>
-    </svg>
-  )
-}
+const { Title, Paragraph } = Typography
 
 interface UploadedImage {
   id: string
@@ -37,7 +11,7 @@ interface UploadedImage {
   preview: string
 }
 
-export function RemixPage() {
+function RemixPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const title = searchParams.get('title') || 'Brazil Jersey in Transit'
@@ -48,14 +22,14 @@ export function RemixPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // 处理图片上传
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
 
     const newImages: UploadedImage[] = []
     for (let i = 0; i < Math.min(files.length, 5 - uploadedImages.length); i++) {
       const file = files[i]
-      if (file.size > 10 * 1024 * 1024) continue // 跳过超过10MB的文件
+      if (file.size > 10 * 1024 * 1024) continue
       
       newImages.push({
         id: `img-${Date.now()}-${i}`,
@@ -65,10 +39,10 @@ export function RemixPage() {
     }
 
     setUploadedImages(prev => [...prev, ...newImages].slice(0, 5))
-  }
+  }, [uploadedImages.length])
 
   // 删除已上传的图片
-  const handleRemoveImage = (id: string) => {
+  const handleRemoveImage = useCallback((id: string) => {
     setUploadedImages(prev => {
       const removed = prev.find(img => img.id === id)
       if (removed) {
@@ -76,82 +50,88 @@ export function RemixPage() {
       }
       return prev.filter(img => img.id !== id)
     })
-  }
+  }, [])
 
   // 生成视频
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     if (uploadedImages.length === 0) return
     
     setIsGenerating(true)
-    
-    // 模拟生成视频过程
     await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Mock 生成的视频URL
     setGeneratedVideo('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&h=800&fit=crop')
     setIsGenerating(false)
-  }
+  }, [uploadedImages.length])
 
   // 返回上一页
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     navigate(-1)
-  }
+  }, [navigate])
 
   return (
-    <div className="remix-page">
+    <div className="fixed inset-0 z-[200] flex items-end justify-center">
       {/* 背景遮罩 */}
-      <div className="remix-backdrop" onClick={handleClose} />
+      <div 
+        className="absolute inset-0 bg-black/80" 
+        onClick={handleClose} 
+      />
       
       {/* 主内容区 */}
-      <div className="remix-panel">
+      <div className="relative w-full max-h-[calc(100vh-84px)] bg-[#131517] rounded-t-3xl overflow-hidden animate-slideUp">
         {/* 关闭按钮 */}
-        <button className="remix-close-btn" onClick={handleClose}>
-          <CloseIcon />
-        </button>
+        <Button
+          type="text"
+          icon={<CloseOutlined className="text-white text-lg" />}
+          onClick={handleClose}
+          className="!absolute !top-6 !right-6 !z-10 !w-9 !h-9 !flex !items-center !justify-center !rounded-full hover:!bg-white/10"
+        />
 
-        <div className="remix-content">
+        <div className="flex p-12 gap-12 h-[calc(100vh-84px)]">
           {/* 左侧表单区 */}
-          <div className="remix-form">
-            <div className="remix-form-inner">
+          <div className="flex-1 flex flex-col">
+            <div className="flex flex-col gap-6">
               {/* 标题 */}
-              <h1 className="remix-title">{title}</h1>
+              <Title level={2} className="!text-white !text-3xl !font-bold !mb-0">
+                {title}
+              </Title>
               
               {/* 描述 */}
-              <p className="remix-description">
+              <Paragraph className="!text-white/50 !text-base !mb-0">
                 A train appears behind the subject at full speed—loud, fast, and intense. 
                 A perfect jump-scare or dramatic backdrop
-              </p>
+              </Paragraph>
 
               {/* 上传区域 */}
-              <div className="upload-section">
+              <div className="mt-4">
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/png,image/jpeg"
                   multiple
                   onChange={handleFileSelect}
-                  className="upload-input"
+                  className="hidden"
                 />
                 
                 <div 
-                  className="upload-area"
+                  className="border-2 border-dashed border-white/20 rounded-xl p-6 cursor-pointer hover:border-white/40 transition-colors"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {uploadedImages.length === 0 ? (
-                    <div className="upload-placeholder">
-                      <UploadIcon />
-                      <div className="upload-text">
-                        <span className="upload-label">Upload Image</span>
-                        <span className="upload-hint">Please upload 1–5 images.(PNG/JPG, under 10MB)</span>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
+                        <PlusOutlined className="text-white text-xl" />
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">Upload Image</p>
+                        <p className="text-white/40 text-sm">Please upload 1–5 images.(PNG/JPG, under 10MB)</p>
                       </div>
                     </div>
                   ) : (
-                    <div className="uploaded-images">
+                    <div className="flex flex-wrap gap-3">
                       {uploadedImages.map(img => (
-                        <div key={img.id} className="uploaded-image">
-                          <img src={img.preview} alt="" />
+                        <div key={img.id} className="relative w-20 h-20 rounded-lg overflow-hidden group">
+                          <img src={img.preview} alt="" className="w-full h-full object-cover" />
                           <button 
-                            className="remove-image-btn"
+                            className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleRemoveImage(img.id)
@@ -162,8 +142,8 @@ export function RemixPage() {
                         </div>
                       ))}
                       {uploadedImages.length < 5 && (
-                        <div className="add-more-image">
-                          <UploadIcon />
+                        <div className="w-20 h-20 bg-white/5 rounded-lg flex items-center justify-center">
+                          <PlusOutlined className="text-white/40 text-xl" />
                         </div>
                       )}
                     </div>
@@ -172,33 +152,37 @@ export function RemixPage() {
               </div>
 
               {/* 生成按钮 */}
-              <button 
-                className={`generate-btn ${isGenerating ? 'generating' : ''} ${uploadedImages.length === 0 ? 'disabled' : ''}`}
+              <Button
+                type="primary"
+                size="large"
                 onClick={handleGenerate}
                 disabled={isGenerating || uploadedImages.length === 0}
+                loading={isGenerating}
+                className="!bg-gradient-to-r !from-green-400 !to-lime-400 !border-0 !rounded-full !h-12 !text-base !font-semibold !text-black disabled:!opacity-50"
               >
                 {isGenerating ? 'Generating...' : 'Generate Video'}
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* 右侧预览区 */}
-          <div className="remix-preview">
-            <div className="preview-container">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-full max-w-md aspect-square rounded-2xl overflow-hidden relative">
               {generatedVideo ? (
-                <div className="preview-video">
-                  <img src={generatedVideo} alt="Generated video preview" />
-                  <div className="play-overlay">
-                    <PlayIcon />
+                <div className="relative w-full h-full">
+                  <img src={generatedVideo} alt="Generated video preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <PlayCircleFilled className="text-white text-6xl opacity-80 hover:opacity-100 transition-opacity cursor-pointer" />
                   </div>
                 </div>
               ) : (
-                <div className="preview-placeholder">
+                <div className="relative w-full h-full">
                   <img 
                     src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=800&fit=crop" 
                     alt="Preview" 
+                    className="w-full h-full object-cover opacity-50"
                   />
-                  <div className="preview-mask" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 </div>
               )}
             </div>
@@ -208,3 +192,5 @@ export function RemixPage() {
     </div>
   )
 }
+
+export default RemixPage

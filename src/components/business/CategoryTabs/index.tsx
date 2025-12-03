@@ -1,34 +1,33 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { Button } from 'antd'
 import type { Category } from '../../../types'
-import './CategoryTabs.css'
 
+// Types
 interface CategoryTabsProps {
   categories: Category[]
   activeSlug?: string
   onCategoryClick?: (categorySlug: string) => void
 }
 
-export function CategoryTabs({ categories, activeSlug, onCategoryClick }: CategoryTabsProps) {
+// Component
+function CategoryTabs({ categories, activeSlug, onCategoryClick }: CategoryTabsProps) {
   const [activeCategory, setActiveCategory] = useState<string>(activeSlug || '')
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 })
   const tabsRef = useRef<HTMLDivElement>(null)
   const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
 
-  // 同步外部传入的 activeSlug
   useEffect(() => {
     if (activeSlug) {
       setActiveCategory(activeSlug)
     }
   }, [activeSlug])
 
-  // 默认选中第一个分类
   useEffect(() => {
     if (!activeCategory && categories.length > 0) {
       setActiveCategory(categories[0].slug)
     }
   }, [categories, activeCategory])
 
-  // 更新下划线位置
   const updateUnderline = useCallback(() => {
     const activeTab = tabRefs.current.get(activeCategory)
     const container = tabsRef.current
@@ -42,56 +41,63 @@ export function CategoryTabs({ categories, activeSlug, onCategoryClick }: Catego
     }
   }, [activeCategory])
 
-  // 当激活项变化时更新下划线
   useEffect(() => {
     updateUnderline()
   }, [activeCategory, updateUnderline, categories])
 
-  // 监听窗口大小变化
   useEffect(() => {
     window.addEventListener('resize', updateUnderline)
     return () => window.removeEventListener('resize', updateUnderline)
   }, [updateUnderline])
 
-  const handleCategoryClick = (slug: string) => {
+  const handleCategoryClick = useCallback((slug: string) => {
     setActiveCategory(slug)
     onCategoryClick?.(slug)
-  }
+  }, [onCategoryClick])
 
-  const setTabRef = (slug: string, el: HTMLButtonElement | null) => {
+  const setTabRef = useCallback((slug: string, el: HTMLButtonElement | null) => {
     if (el) {
       tabRefs.current.set(slug, el)
     } else {
       tabRefs.current.delete(slug)
     }
-  }
+  }, [])
+
+  const underlineOpacity = useMemo(() => underlineStyle.width > 0 ? 1 : 0, [underlineStyle.width])
 
   if (categories.length === 0) {
     return null
   }
 
   return (
-    <div className="category-tabs" ref={tabsRef}>
-      <div className="category-list">
+    <div className="relative px-10" ref={tabsRef}>
+      <div className="flex items-center gap-9 overflow-x-auto pb-3 scrollbar-hide">
         {categories.map((category) => (
-          <button
+          <Button
             key={category.id}
-            ref={(el) => setTabRef(category.slug, el)}
-            className={`category-item ${activeCategory === category.slug ? 'active' : ''}`}
+            ref={(el) => setTabRef(category.slug, el as HTMLButtonElement | null)}
+            type="text"
+            className={`!text-xl !font-semibold !whitespace-nowrap !p-0 !h-auto !border-none transition-all ${
+              activeCategory === category.slug
+                ? '!font-bold gradient-text-green'
+                : '!text-white/50 hover:!text-white/80'
+            }`}
             onClick={() => handleCategoryClick(category.slug)}
           >
             {category.name}
-          </button>
+          </Button>
         ))}
       </div>
-      <div 
-        className="category-underline" 
-        style={{ 
-          left: underlineStyle.left, 
+      <div
+        className="absolute bottom-0 h-[3px] gradient-green rounded transition-all duration-300"
+        style={{
+          left: underlineStyle.left,
           width: underlineStyle.width,
-          opacity: underlineStyle.width > 0 ? 1 : 0
-        }} 
+          opacity: underlineOpacity
+        }}
       />
     </div>
   )
 }
+
+export default CategoryTabs

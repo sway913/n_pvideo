@@ -1,16 +1,17 @@
 import { Outlet } from 'react-router-dom'
-import { Header } from '../components/common/Header'
-import { LoginModal } from '../components/common/LoginModal'
-import './MainLayout.css'
+import { Header, LoginModal } from '../components/common'
 
-export function MainLayout() {
+// Component
+function MainLayout() {
   return (
-    <div className="main-layout">
+    <div className="min-h-screen bg-black">
       <Header />
-      <main className="main-content">
+      <main className="pt-[72px]">
         <Outlet />
       </main>
       <LoginModal />
     </div>
   )
 }
+
+export default MainLayout

@@ -1,70 +1,96 @@
+import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Button, Avatar } from 'antd'
+import { StarOutlined } from '@ant-design/icons'
 import { NAV_ITEMS } from '../../../constants'
 import { useAuth } from '../../../context/AuthContext'
-import './Header.css'
 
-export function Header() {
+// Types
+interface HeaderProps {
+  className?: string
+}
+
+// Component
+function Header({ className = '' }: HeaderProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, isAuthenticated, openLoginModal, logout } = useAuth()
 
-  // 根据当前路径确定激活的导航项
-  const getActiveNav = () => {
+  const getActiveNav = useCallback(() => {
     const currentPath = location.pathname
     const activeItem = NAV_ITEMS.find(item => currentPath.startsWith(item.path))
     return activeItem?.id || 'explore'
-  }
+  }, [location.pathname])
 
-  const handleNavClick = (path: string) => {
+  const handleNavClick = useCallback((path: string) => {
     navigate(path)
-  }
+  }, [navigate])
+
+  const handleLogoClick = useCallback(() => {
+    navigate('/')
+  }, [navigate])
 
   return (
-    <header className="header">
-      <div className="header-left">
-        <div className="logo" onClick={() => navigate('/')}>
-          <span className="logo-text">Nami Video</span>
+    <header className={`fixed top-0 left-0 right-0 h-[72px] flex items-center justify-between px-6 bg-transparent z-[100] ${className}`}>
+      <div className="flex-1">
+        <div 
+          className="flex items-center gap-2 cursor-pointer" 
+          onClick={handleLogoClick}
+        >
+          <span className="text-2xl font-semibold text-white drop-shadow-sm">Nami Video</span>
         </div>
       </div>
 
-      <nav className="header-nav">
-        <div className="nav-pill">
+      <nav className="flex-1 flex justify-center">
+        <div className="flex items-center gap-9 px-[60px] py-[11px] bg-white/10 rounded-[45px] shadow-md">
           {NAV_ITEMS.map((item) => (
-            <button
+            <Button
               key={item.id}
-              className={`nav-item ${getActiveNav() === item.id ? 'active' : ''}`}
+              type="text"
+              className={`!text-xl !font-bold !p-0 !h-auto ${
+                getActiveNav() === item.id 
+                  ? '!text-white' 
+                  : '!text-white/50 hover:!text-white/80'
+              }`}
               onClick={() => handleNavClick(item.path)}
             >
               {item.name}
-            </button>
+            </Button>
           ))}
         </div>
       </nav>
 
-      <div className="header-right">
+      <div className="flex-1 flex items-center justify-end gap-4">
         {isAuthenticated && user ? (
-          // 已登录状态
           <>
-            <div className="credits">
-              <svg className="credits-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span className="credits-amount">{user.credits}</span>
+            <div className="flex items-center gap-2">
+              <StarOutlined className="text-2xl text-white" />
+              <span className="text-xl font-bold text-white">{user.credits}</span>
             </div>
-            <button className="assets-btn">
-              <span>Assets</span>
-            </button>
-            <div className="avatar" onClick={logout} title="点击退出登录">
-              <img src={user.avatar} alt={user.name} />
-            </div>
+            <Button 
+              className="!px-[62px] !py-[11px] !h-auto !bg-white/10 !rounded-[30px] !border-none !text-white !text-base !font-bold hover:!bg-white/20"
+            >
+              Assets
+            </Button>
+            <Avatar 
+              src={user.avatar} 
+              alt={user.name}
+              size={48}
+              className="cursor-pointer"
+              onClick={logout}
+            />
           </>
         ) : (
-          // 未登录状态
-          <button className="sign-in-btn" onClick={openLoginModal}>
-            <span>Sign In</span>
-          </button>
+          <Button
+            className="!px-4 !py-2 !h-auto gradient-green !rounded-[50px] !border-none !text-black !text-[15px] !font-semibold hover:!scale-105 hover:!shadow-lg hover:!shadow-green-400/40 transition-all"
+            onClick={openLoginModal}
+          >
+            Sign In
+          </Button>
         )}
       </div>
     </header>
   )
 }
+
+export default Header

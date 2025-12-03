@@ -1,3 +1,3 @@
-export { CategoryTabs } from './CategoryTabs'
-export { FeaturedCards } from './FeaturedCards'
-export { VideoGrid } from './VideoGrid'
+export { default as CategoryTabs } from './CategoryTabs'
+export { default as FeaturedCards } from './FeaturedCards'
+export { default as VideoGrid } from './VideoGrid'
