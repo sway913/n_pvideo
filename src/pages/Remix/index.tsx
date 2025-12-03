@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, message } from 'antd'
 import { CloseOutlined, SoundOutlined, ExpandOutlined } from '@ant-design/icons'
@@ -7,6 +7,12 @@ interface UploadedImage {
   id: string
   file: File
   preview: string
+}
+
+interface HistoryImage {
+  id: string
+  preview: string
+  timestamp: number
 }
 
 // 上传图标组件
@@ -29,9 +35,91 @@ function RemixPage() {
   const templateImage = searchParams.get('image') || 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=800&fit=crop'
   
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([])
+  const [historyImages, setHistoryImages] = useState<HistoryImage[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // 加载历史记录
+  useEffect(() => {
+    const saved = localStorage.getItem('remix_history')
+    if (saved) {
+      try {
+        setHistoryImages(JSON.parse(saved))
+      } catch {
+        // ignore
+      }
+    }
+  }, [])
+
+  // 将图片转换为 base64
+  const imageToBase64 = useCallback((file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }, [])
+
+  // 保存历史记录 - 将图片转为 base64 存储
+  const saveToHistory = useCallback(async (images: UploadedImage[]) => {
+    const newHistoryItems: HistoryImage[] = []
+    
+    for (const img of images) {
+      // 如果已经是 base64 或外部 URL，直接使用
+      if (img.preview.startsWith('data:') || img.preview.startsWith('http')) {
+        newHistoryItems.push({
+          id: img.id,
+          preview: img.preview,
+          timestamp: Date.now()
+        })
+      } else if (img.file && img.file.size > 0) {
+        // 如果是 blob URL，转换为 base64
+        try {
+          const base64 = await imageToBase64(img.file)
+          newHistoryItems.push({
+            id: img.id,
+            preview: base64,
+            timestamp: Date.now()
+          })
+        } catch {
+          // 转换失败时跳过
+        }
+      }
+    }
+    
+    if (newHistoryItems.length > 0) {
+      setHistoryImages(prev => {
+        const updated = [...newHistoryItems, ...prev].slice(0, 20) // 最多保存20条
+        localStorage.setItem('remix_history', JSON.stringify(updated))
+        return updated
+      })
+    }
+  }, [imageToBase64])
+
+  // 从历史记录选择图片
+  const handleSelectFromHistory = useCallback((historyImg: HistoryImage) => {
+    if (uploadedImages.length >= 5) return
+    
+    // 创建一个新的上传图片对象
+    const newImage: UploadedImage = {
+      id: `history-${Date.now()}`,
+      file: new File([], 'history-image'), // 虚拟文件
+      preview: historyImg.preview
+    }
+    setUploadedImages(prev => [...prev, newImage].slice(0, 5))
+  }, [uploadedImages.length])
+
+  // 删除历史记录图片
+  const handleRemoveFromHistory = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setHistoryImages(prev => {
+      const updated = prev.filter(img => img.id !== id)
+      localStorage.setItem('remix_history', JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   // 处理图片上传
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,11 +165,14 @@ function RemixPage() {
       return
     }
     
+    // 保存到历史记录
+    saveToHistory(uploadedImages)
+    
     setIsGenerating(true)
     await new Promise(resolve => setTimeout(resolve, 2000))
     setGeneratedVideo('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=800&fit=crop')
     setIsGenerating(false)
-  }, [uploadedImages.length])
+  }, [uploadedImages, saveToHistory])
 
   // 返回上一页
   const handleClose = useCallback(() => {
@@ -142,14 +233,14 @@ function RemixPage() {
               {description}
             </p>
 
-            {/* 上传区域 - 460x345 */}
+            {/* 上传区域 - 460x345 -> 调整为 460x210，给历史记录区域留出空间 */}
             <div 
               className="absolute cursor-pointer transition-colors hover:border-white/20"
               style={{ 
                 left: 24, 
                 top: 134, 
                 width: 460, 
-                height: 345,
+                height: historyImages.length > 0 ? 210 : 345,
                 background: 'rgba(255, 255, 255, 0.04)',
                 border: '1px dashed rgba(255, 255, 255, 0.1)',
                 borderRadius: 12
@@ -166,7 +257,7 @@ function RemixPage() {
               />
               
               {uploadedImages.length === 0 ? (
-                <div className="absolute flex flex-col items-center gap-2" style={{ left: 76, top: 141, width: 308 }}>
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                   <UploadIcon />
                   <div className="flex flex-col items-center gap-0.5">
                     <span 
@@ -207,6 +298,64 @@ function RemixPage() {
                 </div>
               )}
             </div>
+
+            {/* 历史记录区域 - History */}
+            {historyImages.length > 0 && (
+              <div 
+                className="absolute"
+                style={{ 
+                  left: 0, 
+                  top: 503, 
+                  width: 508, 
+                  height: 135 
+                }}
+              >
+                {/* History 标题 */}
+                <h3 
+                  className="text-white/40 font-bold text-base"
+                  style={{ 
+                    marginLeft: 24,
+                    fontFamily: 'ChillDINGothic, Inter, sans-serif'
+                  }}
+                >
+                  History
+                </h3>
+                
+                {/* 历史图片列表 - 横向滚动 */}
+                <div 
+                  className="mt-3 flex gap-2 overflow-x-auto scrollbar-hide px-6"
+                  style={{ height: 100 }}
+                >
+                  {historyImages.map((img) => (
+                    <div 
+                      key={img.id}
+                      className="relative flex-shrink-0 w-[100px] h-[100px] rounded-lg overflow-hidden cursor-pointer group hover:ring-2 hover:ring-white/50 transition-all"
+                      onClick={() => handleSelectFromHistory(img)}
+                    >
+                      <img 
+                        src={img.preview} 
+                        alt="History" 
+                        className="w-full h-full object-cover"
+                      />
+                      {/* 选中覆盖层 */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                        <span className="text-white text-2xl">+</span>
+                      </div>
+                      {/* 右上角删除按钮 - z-index更高确保在覆盖层之上 */}
+                      <button
+                        className="absolute top-1 right-1 z-10 w-[18px] h-[18px] rounded-[9px] bg-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ border: '1.5px solid white' }}
+                        onClick={(e) => handleRemoveFromHistory(img.id, e)}
+                      >
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                          <path d="M1 1L7 7M7 1L1 7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* 生成按钮 - 457x48 */}
             <button
