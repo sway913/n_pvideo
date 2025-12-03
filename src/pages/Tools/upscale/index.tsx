@@ -1,12 +1,10 @@
 import { useState, useRef, useCallback } from 'react'
 import { Button, Upload, message } from 'antd'
-import { UploadOutlined } from '@ant-design/icons'
 import type { UploadProps, UploadFile } from 'antd'
 
 function UpscalePage() {
   const [fileList, setFileList] = useState<any[]>([])
   const [uploading, setUploading] = useState(false)
-  const uploadRef = useRef<any>(null)
 
   const handleUpload: UploadProps['onChange'] = useCallback(({ fileList: newFileList }: { fileList: UploadFile[] }) => {
     // 限制只能上传一个文件
