@@ -223,6 +223,191 @@ function ImageUploader({ fileList, onChange }: { fileList: UploadFile[]; onChang
   )
 }
 
+// Keyframe upload icon component - matching Figma design
+function KeyframeUploadIcon() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Background circle (sun) */}
+      <circle cx="9.33" cy="9.33" r="2.67" fill="white" />
+      {/* Outer frame with rounded corners */}
+      <rect x="2" y="2" width="25.33" height="25.33" rx="6.67" stroke="white" strokeWidth="2.67" fill="none" />
+      {/* Mountain shape */}
+      <path d="M2 24L12 14L22 24" stroke="white" strokeWidth="2.67" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      {/* Plus icon in bottom right */}
+      <g transform="translate(20.67, 16.67)">
+        <line x1="5.33" y1="0" x2="5.33" y2="10.67" stroke="white" strokeWidth="2.67" strokeLinecap="round" />
+        <line x1="0" y1="5.33" x2="10.67" y2="5.33" stroke="white" strokeWidth="2.67" strokeLinecap="round" />
+      </g>
+    </svg>
+  )
+}
+
+// Link/swap icon for keyframe connection - "ic-替换" matching Figma design
+// Inner icon: 22x22, path: 18.33x15.71 at offset (1.83, 3.05)
+function KeyframeLinkIcon() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Background circle */}
+      <circle cx="16" cy="16" r="16" fill="#111111" />
+      {/* Inner swap/replace icon - two horizontal arrows */}
+      <g transform="translate(5, 5)" opacity="0.9">
+        {/* Top arrow pointing right */}
+        <path 
+          d="M3 7H16L13 4" 
+          stroke="white" 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <path 
+          d="M16 7L13 10" 
+          stroke="white" 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          fill="none"
+        />
+        {/* Bottom arrow pointing left */}
+        <path 
+          d="M19 15H6L9 18" 
+          stroke="white" 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <path 
+          d="M6 15L9 12" 
+          stroke="white" 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
+    </svg>
+  )
+}
+
+// Keyframe uploader component for First Frame and End Frame
+function KeyframeUploader({ 
+  firstFrame, 
+  endFrame, 
+  onFirstFrameChange, 
+  onEndFrameChange 
+}: { 
+  firstFrame: UploadFile | null
+  endFrame: UploadFile | null
+  onFirstFrameChange: (file: UploadFile | null) => void
+  onEndFrameChange: (file: UploadFile | null) => void
+}) {
+  const createUploadProps = (onChange: (file: UploadFile | null) => void): UploadProps => ({
+    listType: 'picture-card',
+    maxCount: 1,
+    showUploadList: false,
+    beforeUpload: (file) => {
+      const isImage = file.type.startsWith('image/')
+      if (!isImage) {
+        message.error('只能上传图片文件!')
+        return Upload.LIST_IGNORE
+      }
+      const uploadFile: UploadFile = {
+        uid: Date.now().toString(),
+        name: file.name,
+        status: 'done',
+        originFileObj: file,
+      }
+      onChange(uploadFile)
+      return false
+    },
+  })
+
+  const UploadBox = ({ 
+    file, 
+    label, 
+    onChange, 
+    uploadProps 
+  }: { 
+    file: UploadFile | null
+    label: string
+    onChange: (file: UploadFile | null) => void
+    uploadProps: UploadProps
+  }) => (
+    <div className="w-[167px] h-[167px] relative">
+      {file ? (
+        <div 
+          className="w-full h-full rounded-xl overflow-hidden bg-white/[0.04]"
+          style={{ border: '1px dashed rgba(255,255,255,0.1)' }}
+        >
+          <img
+            src={file.thumbUrl || file.url || (file.originFileObj ? URL.createObjectURL(file.originFileObj as Blob) : '')}
+            alt={label}
+            className="w-full h-full object-cover"
+          />
+          <button
+            className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center hover:bg-black/80 transition-colors outline-none"
+            onClick={() => onChange(null)}
+          >
+            ×
+          </button>
+        </div>
+      ) : (
+        <Upload {...uploadProps} className="!border-0 [&_.ant-upload]:!border-0 [&_.ant-upload-select]:!border-0 [&_.ant-upload]:!bg-transparent">
+          <div 
+            className="w-[167px] h-[167px] rounded-xl bg-white/[0.04] flex flex-col items-center justify-center cursor-pointer hover:bg-white/[0.06] transition-colors"
+            style={{ border: '1px dashed rgba(255,255,255,0.1)' }}
+          >
+            <div className="flex flex-col items-center opacity-60">
+              <KeyframeUploadIcon />
+              <span className="text-sm text-white text-center mt-2 font-semibold">
+                {label}
+              </span>
+            </div>
+          </div>
+        </Upload>
+      )}
+    </div>
+  )
+
+  return (
+    <div className="space-y-[11px]">
+      {/* Image label */}
+      <span className="text-base font-bold text-white/50">Image</span>
+      
+      {/* Upload boxes row with link icon overlay */}
+      <div className="flex items-start relative">
+        {/* First Frame */}
+        <UploadBox
+          file={firstFrame}
+          label="First Frame"
+          onChange={onFirstFrameChange}
+          uploadProps={createUploadProps(onFirstFrameChange)}
+        />
+        
+        {/* Gap spacer */}
+        <div className="w-[9px] flex-shrink-0" />
+        
+        {/* End Frame */}
+        <UploadBox
+          file={endFrame}
+          label="End Frame"
+          onChange={onEndFrameChange}
+          uploadProps={createUploadProps(onEndFrameChange)}
+        />
+        
+        {/* Link icon overlay - centered between two boxes */}
+        <div 
+          className="absolute z-10"
+          style={{ left: '155px', top: '68px' }}
+        >
+          <KeyframeLinkIcon />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PromptInput({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return (
     <div className="space-y-2">
@@ -306,14 +491,28 @@ function VideoPage() {
   const [selectedRatio, setSelectedRatio] = useState('16:9')
   const [prompt, setPrompt] = useState('')
   const [fileList, setFileList] = useState<UploadFile[]>([])
+  // Keyframe Video states
+  const [firstFrame, setFirstFrame] = useState<UploadFile | null>(null)
+  const [endFrame, setEndFrame] = useState<UploadFile | null>(null)
 
   const handleGenerate = useCallback(() => {
-    if (fileList.length === 0) {
+    if (activeTab === 'image-to-video' && fileList.length === 0) {
       message.warning('请先上传至少一张图片')
       return
     }
+    if (activeTab === 'text-to-video' && !prompt.trim()) {
+      message.warning('请输入视频描述内容')
+      return
+    }
+    if (activeTab === 'keyframe-video' && (!firstFrame || !endFrame)) {
+      message.warning('请上传首帧和尾帧图片')
+      return
+    }
     message.success('视频生成任务已提交!')
-  }, [fileList])
+  }, [activeTab, fileList, prompt, firstFrame, endFrame])
+
+  // Check if generate button should be disabled for keyframe mode
+  const isKeyframeReady = activeTab !== 'keyframe-video' || (firstFrame && endFrame)
 
   const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab)
@@ -343,14 +542,28 @@ function VideoPage() {
         <div className="w-[392px] flex-shrink-0">
           <div className="bg-[#131517] border border-white/10 rounded-3xl p-6 space-y-4">
             <ModelSelector model={MODELS[0]} />
-            <ImageUploader fileList={fileList} onChange={setFileList} />
+            {/* Image Uploader - only show for image-to-video tab */}
+            {activeTab === 'image-to-video' && (
+              <ImageUploader fileList={fileList} onChange={setFileList} />
+            )}
+            {/* Keyframe Uploader - only show for keyframe-video tab */}
+            {activeTab === 'keyframe-video' && (
+              <KeyframeUploader
+                firstFrame={firstFrame}
+                endFrame={endFrame}
+                onFirstFrameChange={setFirstFrame}
+                onEndFrameChange={setEndFrame}
+              />
+            )}
             <PromptInput value={prompt} onChange={setPrompt} />
             <RatioSelector selectedRatio={selectedRatio} onSelect={setSelectedRatio} />
             
             {/* Generate Button */}
             <Button
               type="primary"
-              className="!w-full !h-11 !rounded-[50px] !text-xl !font-bold gradient-green !border-none !text-black hover:!opacity-90 transition-opacity"
+              className={`!w-full !h-11 !rounded-[50px] !text-xl !font-bold gradient-green !border-none !text-black transition-opacity ${
+                isKeyframeReady ? 'hover:!opacity-90' : '!opacity-30'
+              }`}
               onClick={handleGenerate}
             >
               Generate Video
