@@ -182,7 +182,7 @@ function VideoGrid({
             onClick={handleViewAll}
           >
             <span className="gradient-text-green text-base font-bold">
-              View all {title}
+              {viewAllText} {title}
             </span>
           </Button>
         </div>
