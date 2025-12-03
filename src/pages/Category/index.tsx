@@ -96,7 +96,7 @@ function CategoryPage() {
 
   const handleRemixClick = useCallback((e: React.MouseEvent, video: Video) => {
     e.stopPropagation()
-    navigate(`/remix?title=${encodeURIComponent(video.title)}&id=${video.id}`)
+    navigate(`/remix?title=${encodeURIComponent(video.title)}&id=${video.id}&image=${encodeURIComponent(video.image)}`)
   }, [navigate])
 
   if (!category) {
