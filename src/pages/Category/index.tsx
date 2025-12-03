@@ -152,15 +152,21 @@ function CategoryPage() {
                   />
                   {video.tag && <VideoTagBadge tag={video.tag} />}
                   {hoveredId === video.id && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex items-end p-4 animate-fadeIn">
-                      <div className="flex items-center justify-between w-full">
-                        <h4 className="text-white text-sm font-medium truncate flex-1 mr-3">
+                    <div className="absolute inset-0 flex flex-col justify-end animate-fadeIn">
+                      {/* 底部渐变遮罩层 */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[187px] bg-gradient-to-t from-black to-transparent rounded-b-lg" />
+                      {/* 内容区域 */}
+                      <div className="relative z-10 flex flex-col items-center justify-center pb-10">
+                        <h4 className="text-white text-xl font-bold mb-4 px-4 text-center truncate max-w-full tracking-tight">
                           {video.title}
                         </h4>
                         <Button
-                          size="small"
+                          type="text"
+                          className="!border-none !text-black !text-base !font-bold !w-[160px] !h-[39px] !rounded-xl hover:!opacity-90"
+                          style={{
+                            background: 'linear-gradient(135deg, #64FF48 0%, #C8FC39 100%)',
+                          }}
                           onClick={(e) => handleRemixClick(e, video)}
-                          className="!bg-gradient-to-r !from-green-400 !to-lime-400 !border-0 !rounded-full !px-4 !text-black !font-semibold !text-xs"
                         >
                           Remix
                         </Button>

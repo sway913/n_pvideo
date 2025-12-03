@@ -119,59 +119,73 @@ function VideoGrid({
       <Title level={2} className="!text-4xl !font-bold !text-white !uppercase !mb-4">
         {title}
       </Title>
-      <div className="relative h-[600px] overflow-hidden">
-        <div className="grid grid-cols-5 gap-2">
-          {columns.map((column, colIndex) => (
-            <div key={colIndex} className="flex flex-col gap-2">
-              {column.map((video) => (
-                <div
-                  key={video.id}
-                  className="relative rounded-lg overflow-hidden cursor-pointer group"
-                  style={{ height: video.height }}
-                  onMouseEnter={() => setHoveredId(video.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  onClick={() => handleVideoClick(video.id)}
-                >
-                  <img
-                    src={video.image}
-                    alt={video.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  {video.tag && <VideoTagBadge tag={video.tag} />}
-                  {hoveredId === video.id && (
-                    <div className="absolute inset-0 flex flex-col justify-end animate-fadeIn">
-                      {/* 底部渐变遮罩层 */}
-                      <div className="absolute bottom-0 left-0 right-0 h-[187px] bg-gradient-to-t from-black to-transparent rounded-b-lg" />
-                      {/* 内容区域 */}
-                      <div className="relative z-10 flex flex-col items-center justify-center pb-10">
-                        <h4 className="text-white text-xl font-bold mb-4 px-4 text-center truncate max-w-full tracking-tight">
-                          {video.title}
-                        </h4>
-                        <Button
-                          className="gradient-green !border-none !text-black !text-base !font-bold !w-[160px] !h-[39px] !rounded-xl hover:!opacity-90"
-                          onClick={(e) => handleRemixClick(e, video)}
-                        >
-                          Remix
-                        </Button>
+      <div className="relative">
+        {/* 视频网格区域 - 固定高度并裁剪 */}
+        <div className="h-[600px] overflow-hidden">
+          <div className="grid grid-cols-5 gap-2">
+            {columns.map((column, colIndex) => (
+              <div key={colIndex} className="flex flex-col gap-2">
+                {column.map((video) => (
+                  <div
+                    key={video.id}
+                    className="relative rounded-lg overflow-hidden cursor-pointer group"
+                    style={{ height: video.height }}
+                    onMouseEnter={() => setHoveredId(video.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onClick={() => handleVideoClick(video.id)}
+                  >
+                    <img
+                      src={video.image}
+                      alt={video.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    {video.tag && <VideoTagBadge tag={video.tag} />}
+                    {hoveredId === video.id && (
+                      <div className="absolute inset-0 flex flex-col justify-end animate-fadeIn">
+                        {/* 底部渐变遮罩层 */}
+                        <div className="absolute bottom-0 left-0 right-0 h-[187px] bg-gradient-to-t from-black to-transparent rounded-b-lg" />
+                        {/* 内容区域 */}
+                        <div className="relative z-10 flex flex-col items-center justify-center pb-10">
+                          <h4 className="text-white text-xl font-bold mb-4 px-4 text-center truncate max-w-full tracking-tight">
+                            {video.title}
+                          </h4>
+                          <Button
+                            type="text"
+                            className="!border-none !text-black !text-base !font-bold !w-[160px] !h-[39px] !rounded-xl hover:!opacity-90"
+                            style={{
+                              background: 'linear-gradient(135deg, #64FF48 0%, #C8FC39 100%)',
+                            }}
+                            onClick={(e) => handleRemixClick(e, video)}
+                          >
+                            Remix
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
         {/* 底部渐变遮罩 */}
         <div className="absolute bottom-0 left-0 right-0 h-[245px] bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none" />
         {/* View all 按钮 */}
-        <Button
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 !w-[200px] !h-[48px] !bg-[rgba(105,255,71,0.2)] !border !border-[rgba(105,255,71,0.2)] !rounded-xl hover:!bg-[rgba(105,255,71,0.3)] hover:!border-[rgba(105,255,71,0.4)]"
-          onClick={handleViewAll}
-        >
-          <span className="gradient-text-green text-base font-bold">
-            {viewAllText} {title}
-          </span>
-        </Button>
+        <div className="absolute bottom-12 left-0 right-0 flex justify-center">
+          <Button
+            type="text"
+            className="!w-[200px] !h-[48px] !rounded-xl !flex !items-center !justify-center"
+            style={{
+              background: 'rgba(105, 255, 71, 0.2)',
+              border: '1px solid rgba(105, 255, 71, 0.2)',
+            }}
+            onClick={handleViewAll}
+          >
+            <span className="gradient-text-green text-base font-bold">
+              View all {title}
+            </span>
+          </Button>
+        </div>
       </div>
     </section>
   )
