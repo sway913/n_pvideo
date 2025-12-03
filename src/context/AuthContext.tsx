@@ -19,6 +19,7 @@ const mockUser: User = {
   name: 'John Doe',
   avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
   credits: 200,
+  email: 'johndoe@gmail.com',
 }
 
 interface AuthProviderProps {

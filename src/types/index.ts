@@ -44,6 +44,7 @@ export interface User {
   name: string
   avatar: string
   credits: number
+  email?: string
 }
 
 // 视频网格区块类型

@@ -1,9 +1,11 @@
 import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Button, Avatar } from 'antd'
-import { StarOutlined } from '@ant-design/icons'
+import { Button, Avatar, Dropdown } from 'antd'
+import type { MenuProps } from 'antd'
+import { StarOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons'
 import { NAV_ITEMS } from '../../../constants'
 import { useAuth } from '../../../context/AuthContext'
+import AIToolsDropdown from '../AIToolsDropdown'
 
 // Types
 interface HeaderProps {
@@ -29,6 +31,32 @@ function Header({ className = '' }: HeaderProps) {
   const handleLogoClick = useCallback(() => {
     navigate('/')
   }, [navigate])
+
+  const handleAccountMenuClick: MenuProps['onClick'] = ({ key }) => {
+    switch (key) {
+      case 'account':
+        navigate('/account')
+        break
+      case 'logout':
+        logout()
+        break
+      default:
+        break
+    }
+  }
+
+  const accountItems: MenuProps['items'] = [
+    {
+      key: 'account',
+      icon: <UserOutlined />,
+      label: 'Account',
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Sign out',
+    },
+  ]
 
   return (
     <header className={`fixed top-0 left-0 right-0 h-[72px] flex items-center justify-between px-6 bg-transparent z-[100] ${className}`}>
@@ -57,6 +85,9 @@ function Header({ className = '' }: HeaderProps) {
               {item.name}
             </Button>
           ))}
+          <div className="flex items-center">
+            <AIToolsDropdown />
+          </div>
         </div>
       </nav>
 
@@ -72,13 +103,14 @@ function Header({ className = '' }: HeaderProps) {
             >
               Assets
             </Button>
-            <Avatar 
-              src={user.avatar} 
-              alt={user.name}
-              size={48}
-              className="cursor-pointer"
-              onClick={logout}
-            />
+            <Dropdown menu={{ items: accountItems, onClick: handleAccountMenuClick }} trigger={['click']}>
+              <Avatar 
+                src={user.avatar} 
+                alt={user.name}
+                size={48}
+                className="cursor-pointer"
+              />
+            </Dropdown>
           </>
         ) : (
           <Button

@@ -4,8 +4,7 @@ import type { NavItem, Category } from '../types'
 export const NAV_ITEMS: NavItem[] = [
   { id: 'explore', name: 'Explore', path: '/explore' },
   { id: 'video', name: 'Video', path: '/video' },
-  { id: 'edit', name: 'Edit', path: '/edit' },
-  { id: 'tools', name: 'Tools', path: '/tools' },
+  { id: 'edit', name: 'Edit', path: '/edit' }
 ]
 
 // 分类配置
