@@ -47,6 +47,33 @@
   transform: scale(1.05);
 }
 
+/* 视频标签样式 */
+.video-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 6px;
+  height: 20px;
+  border-radius: 10px;
+  z-index: 2;
+}
+
+.tag-icon {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.tag-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
 .video-overlay {
   position: absolute;
   inset: 0;

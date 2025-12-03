@@ -1,3 +1,6 @@
+// 视频标签类型
+export type VideoTag = 'hot' | 'new' | 'recommended' | null
+
 // 视频相关类型
 export interface Video {
   id: number
@@ -8,6 +11,7 @@ export interface Video {
   views?: number
   author?: string
   createdAt?: string
+  tag?: VideoTag
 }
 
 // 特色卡片类型

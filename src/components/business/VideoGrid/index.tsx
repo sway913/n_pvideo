@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { Video } from '../../../types'
+import type { Video, VideoTag } from '../../../types'
 import './VideoGrid.css'
 
 // 模拟视频数据
@@ -34,13 +34,36 @@ const generateVideos = (count: number): Video[] => {
     'Animation Demo',
     'Product Showcase',
   ]
+  // 随机添加标签
+  const tags: VideoTag[] = ['hot', 'new', 'recommended', null, null, null, null]
 
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
     title: titles[i % titles.length],
     image: images[i % images.length],
     height: heights[i % heights.length],
+    tag: tags[Math.floor(Math.random() * tags.length)],
   }))
+}
+
+// 标签组件
+function VideoTagBadge({ tag }: { tag: VideoTag }) {
+  if (!tag) return null
+  
+  const tagConfig = {
+    hot: { label: '热门', icon: '🔥', gradient: 'linear-gradient(136deg, #FF4B33 0%, #FF55A6 100%)' },
+    new: { label: 'New', icon: null, gradient: 'linear-gradient(180deg, #00A3F5 0%, #4DE1FF 100%)' },
+    recommended: { label: '推荐', icon: '👍', gradient: 'linear-gradient(180deg, #3355FF 0%, #73ADFF 100%)' },
+  }
+  
+  const config = tagConfig[tag]
+  
+  return (
+    <div className={`video-tag video-tag-${tag}`} style={{ background: config.gradient }}>
+      {config.icon && <span className="tag-icon">{config.icon}</span>}
+      <span className="tag-label">{config.label}</span>
+    </div>
+  )
 }
 
 interface VideoGridProps {
@@ -93,6 +116,7 @@ export function VideoGrid({
                   onClick={() => handleVideoClick(video.id)}
                 >
                   <img src={video.image} alt={video.title} />
+                  {video.tag && <VideoTagBadge tag={video.tag} />}
                   {hoveredId === video.id && (
                     <div className="video-overlay">
                       <div className="video-info">

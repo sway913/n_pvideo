@@ -7,6 +7,7 @@ const featuredCards: FeaturedCard[] = [
     id: 1,
     title: 'Sora 2-Realism at Every Frame',
     image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&h=400&fit=crop',
+    link: '/video/sora-2',
   },
   {
     id: 2,
@@ -21,6 +22,16 @@ const featuredCards: FeaturedCard[] = [
   },
 ]
 
+// 箭头图标组件
+function ArrowIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5.83334 14.1667L14.1667 5.83334" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5.83334 5.83334H14.1667V14.1667" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
 interface FeaturedCardsProps {
   cards?: FeaturedCard[]
 }
@@ -29,7 +40,7 @@ export function FeaturedCards({ cards = featuredCards }: FeaturedCardsProps) {
   return (
     <section className="featured-section">
       <div className="featured-cards">
-        {cards.map((card) => (
+        {cards.map((card, index) => (
           <div key={card.id} className="featured-card">
             <div className="card-image">
               <img src={card.image} alt={card.title} />
@@ -37,6 +48,11 @@ export function FeaturedCards({ cards = featuredCards }: FeaturedCardsProps) {
               {card.label && (
                 <div className="card-label">
                   <span>{card.label}</span>
+                </div>
+              )}
+              {card.link && (
+                <div className="card-arrow">
+                  <ArrowIcon />
                 </div>
               )}
             </div>

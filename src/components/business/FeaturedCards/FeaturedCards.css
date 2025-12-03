@@ -58,6 +58,22 @@
   white-space: nowrap;
 }
 
+.card-arrow {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.featured-card:hover .card-arrow {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
 .card-title {
   margin-top: 12px;
   font-size: 16px;
