@@ -38,6 +38,15 @@
     background: linear-gradient(135deg, #64FF48 0%, #C8FC39 100%);
   }
 
+  .gradient-green-btn {
+    background: linear-gradient(135deg, #64FF48 0%, #C8FC39 100%) !important;
+    box-shadow: inset 0px 4px 5.4px 0px rgba(255, 255, 255, 0.53) !important;
+  }
+
+  .gradient-green-btn:hover {
+    background: linear-gradient(135deg, #64FF48 0%, #C8FC39 100%) !important;
+  }
+
   .gradient-text-green,
   .gradient-text-green > span {
     background: linear-gradient(135deg, #64FF48 0%, #C8FC39 100%) !important;

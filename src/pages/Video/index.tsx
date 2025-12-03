@@ -1,19 +1,13 @@
 import { useState, useCallback, useMemo } from 'react'
 import { Button, Input, Upload, message } from 'antd'
-import { RightOutlined } from '@ant-design/icons'
 import type { UploadFile, UploadProps } from 'antd'
+import { ModelDropdown } from '../../components/common'
+import type { ModelInfo } from '../../components/common'
 
 // Types
 interface VideoTabItem {
   id: string
   name: string
-}
-
-interface ModelInfo {
-  id: string
-  name: string
-  description: string
-  image: string
 }
 
 interface RatioOption {
@@ -41,6 +35,36 @@ const MODELS: ModelInfo[] = [
     name: 'Soar_2',
     description: 'The_most_popular_model_at_present',
     image: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=100&h=100&fit=crop',
+  },
+  {
+    id: 'soar-1',
+    name: 'Soar_1',
+    description: 'Fast_generation_model',
+    image: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=100&h=100&fit=crop',
+  },
+  {
+    id: 'ultra-hd',
+    name: 'Ultra_HD',
+    description: 'High_quality_video_output',
+    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop',
+  },
+  {
+    id: 'creative-ai',
+    name: 'Creative_AI',
+    description: 'Best_for_artistic_content',
+    image: 'https://images.unsplash.com/photo-1633177317976-3f9bc45e1d1d?w=100&h=100&fit=crop',
+  },
+  {
+    id: 'fast-render',
+    name: 'Fast_Render',
+    description: 'Quick_preview_generation',
+    image: 'https://images.unsplash.com/photo-1634926878768-2a5b3c42f139?w=100&h=100&fit=crop',
+  },
+  {
+    id: 'cinematic',
+    name: 'Cinematic',
+    description: 'Movie_style_video_effects',
+    image: 'https://images.unsplash.com/photo-1609743522653-52354461eb27?w=100&h=100&fit=crop',
   },
 ]
 
@@ -118,23 +142,7 @@ function ContentToggle({ activeView, onViewChange }: { activeView: 'history' | '
   )
 }
 
-function ModelSelector({ model }: { model: ModelInfo }) {
-  return (
-    <div className="space-y-2">
-      <span className="text-base font-bold text-white/40">Model</span>
-      <div className="flex items-center gap-4 p-2 bg-white/[0.04] rounded-xl cursor-pointer hover:bg-white/[0.08] transition-colors">
-        <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0">
-          <img src={model.image} alt={model.name} className="w-full h-full object-cover" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-base font-bold text-white">{model.name}</div>
-          <div className="text-xs text-white/50 truncate">{model.description}</div>
-        </div>
-        <RightOutlined className="text-white/50" />
-      </div>
-    </div>
-  )
-}
+// ModelSelector has been replaced by the unified ModelDropdown component from common
 
 // Upload icon component matching Figma design
 function UploadIcon() {
@@ -494,6 +502,11 @@ function VideoPage() {
   // Keyframe Video states
   const [firstFrame, setFirstFrame] = useState<UploadFile | null>(null)
   const [endFrame, setEndFrame] = useState<UploadFile | null>(null)
+  const [selectedModel, setSelectedModel] = useState<ModelInfo>(MODELS[0])
+
+  const handleModelSelect = useCallback((model: ModelInfo) => {
+    setSelectedModel(model)
+  }, [])
 
   const handleGenerate = useCallback(() => {
     if (activeTab === 'image-to-video' && fileList.length === 0) {
@@ -541,7 +554,11 @@ function VideoPage() {
         {/* Left Panel - Creation Form */}
         <div className="w-[392px] flex-shrink-0">
           <div className="bg-[#131517] border border-white/10 rounded-3xl p-6 space-y-4">
-            <ModelSelector model={MODELS[0]} />
+            <ModelDropdown 
+              models={MODELS} 
+              selectedModel={selectedModel} 
+              onSelect={handleModelSelect}
+            />
             {/* Image Uploader - only show for image-to-video tab */}
             {activeTab === 'image-to-video' && (
               <ImageUploader fileList={fileList} onChange={setFileList} />
@@ -561,7 +578,7 @@ function VideoPage() {
             {/* Generate Button */}
             <Button
               type="primary"
-              className={`!w-full !h-11 !rounded-[50px] !text-xl !font-bold gradient-green !border-none !text-black transition-opacity ${
+              className={`!w-full !h-11 !rounded-[50px] !text-xl !font-bold gradient-green-btn !border-none !text-black transition-opacity ${
                 isKeyframeReady ? 'hover:!opacity-90' : '!opacity-30'
               }`}
               onClick={handleGenerate}
