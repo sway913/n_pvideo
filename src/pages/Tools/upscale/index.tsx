@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { Button, Upload, message } from 'antd'
 import type { UploadProps, UploadFile } from 'antd'
 
