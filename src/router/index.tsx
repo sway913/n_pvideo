@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { MainLayout } from '../layouts/MainLayout'
-import { ExplorePage, VideoPage, EditPage, ToolsPage, CategoryPage } from '../pages'
+import { ExplorePage, VideoPage, EditPage, ToolsPage, CategoryPage, RemixPage } from '../pages'
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +34,10 @@ export const router = createBrowserRouter([
       {
         path: 'video/:id',
         element: <VideoPage />,
+      },
+      {
+        path: 'remix',
+        element: <RemixPage />,
       },
     ],
   },

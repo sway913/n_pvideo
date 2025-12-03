@@ -99,6 +99,11 @@ export function VideoGrid({
     navigate(`/video/${videoId}`)
   }
 
+  const handleRemixClick = (e: React.MouseEvent, video: Video) => {
+    e.stopPropagation()
+    navigate(`/remix?title=${encodeURIComponent(video.title)}&id=${video.id}`)
+  }
+
   return (
     <section className="video-grid-section">
       <h2 className="section-title">{title}</h2>
@@ -123,10 +128,7 @@ export function VideoGrid({
                         <h4 className="video-title">{video.title}</h4>
                         <button 
                           className="remix-btn"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            // 处理 Remix 操作
-                          }}
+                          onClick={(e) => handleRemixClick(e, video)}
                         >
                           <span>Remix</span>
                         </button>
