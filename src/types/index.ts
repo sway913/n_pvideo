@@ -28,6 +28,7 @@ export interface Category {
   id: string
   name: string
   slug: string
+  description?: string
 }
 
 // 导航项类型

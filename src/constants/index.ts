@@ -10,16 +10,16 @@ export const NAV_ITEMS: NavItem[] = [
 
 // 分类配置
 export const CATEGORIES: Category[] = [
-  { id: '1', name: 'Nano Banana Pro', slug: 'nano-banana-pro' },
-  { id: '2', name: 'Camera Controls', slug: 'camera-controls' },
-  { id: '3', name: 'Viral', slug: 'viral' },
-  { id: '4', name: 'UGC', slug: 'ugc' },
-  { id: '5', name: 'Commercial', slug: 'commercial' },
-  { id: '6', name: 'Tiktok Trend', slug: 'tiktok-trend' },
-  { id: '7', name: 'Black Friday', slug: 'black-friday' },
-  { id: '8', name: 'Christmas Special', slug: 'christmas-special' },
-  { id: '9', name: 'Kling 2.5 Turbo', slug: 'kling-turbo' },
-  { id: '10', name: 'Seedance Pro', slug: 'seedance-pro' },
+  { id: '1', name: 'Nano Banana Pro', slug: 'nano-banana-pro', description: 'The camera pulls back rapidly from the subject to reveal their city, then the continent, and finally the entire Earth. Epic and cinematic—perfect for transitions, scale, or storytelling.' },
+  { id: '2', name: 'Camera Controls', slug: 'camera-controls', description: 'Master the art of camera movement with dynamic controls and techniques for creating professional-looking video content.' },
+  { id: '3', name: 'Viral', slug: 'viral', description: 'Trending content that captures attention and spreads across social media platforms organically.' },
+  { id: '4', name: 'UGC', slug: 'ugc', description: 'User-generated content that feels authentic and connects with audiences on a personal level.' },
+  { id: '5', name: 'Commercial', slug: 'commercial', description: 'Professional advertising and promotional videos designed to showcase products and services.' },
+  { id: '6', name: 'Tiktok Trend', slug: 'tiktok-trend', description: 'Stay ahead with the latest TikTok trends and viral video formats that captivate Gen Z audiences.' },
+  { id: '7', name: 'Black Friday', slug: 'black-friday', description: 'Special promotional content designed for the biggest shopping event of the year.' },
+  { id: '8', name: 'Christmas Special', slug: 'christmas-special', description: 'Festive and holiday-themed content perfect for the Christmas season and winter celebrations.' },
+  { id: '9', name: 'Kling 2.5 Turbo', slug: 'kling-turbo', description: 'Powered by Kling 2.5 Turbo AI engine for ultra-fast and high-quality video generation.' },
+  { id: '10', name: 'Seedance Pro', slug: 'seedance-pro', description: 'Advanced dance and motion content created with Seedance Pro technology.' },
 ]
 
 // 路由路径常量
