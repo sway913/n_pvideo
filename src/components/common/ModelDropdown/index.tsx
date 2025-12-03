@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { RightOutlined, CheckOutlined } from '@ant-design/icons'
+import { RightOutlined } from '@ant-design/icons'
 
 // Types
 export interface ModelInfo {
